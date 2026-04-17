@@ -1,56 +1,70 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useDataset } from '@/context/DatasetContext';
 
 // Helper to fetch data
-const fetchFromTable = async <T>(table: string): Promise<T[]> => {
-  const { data, error } = await supabase.from(table).select('*');
+const fetchFromTable = async <T>(table: string, datasetId: string): Promise<T[]> => {
+  const { data, error } = await supabase.from(table).select('*').eq('dataset_id', datasetId);
   if (error) throw error;
   return data as T[];
 };
 
 export const useOverviewMetrics = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['overview_metrics'],
+    queryKey: ['overview_metrics', activeDataset?.id],
     queryFn: async () => {
-      const data = await fetchFromTable<any>('overview_metrics');
-      return data[0]; // Assuming one row holds the project metrics
-    }
+      if (!activeDataset?.id) return null;
+      const data = await fetchFromTable<any>('overview_metrics', activeDataset.id);
+      return data[0] || null;
+    },
+    enabled: !!activeDataset?.id
   });
 };
 
 export const useFeatureSentiment = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['feature_sentiment'],
-    queryFn: () => fetchFromTable<any>('feature_sentiment')
+    queryKey: ['feature_sentiment', activeDataset?.id],
+    queryFn: () => fetchFromTable<any>('feature_sentiment', activeDataset.id),
+    enabled: !!activeDataset?.id
   });
 };
 
 export const useSentimentOverTime = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['sentiment_over_time'],
-    queryFn: () => fetchFromTable<any>('sentiment_over_time')
+    queryKey: ['sentiment_over_time', activeDataset?.id],
+    queryFn: () => fetchFromTable<any>('sentiment_over_time', activeDataset.id),
+    enabled: !!activeDataset?.id
   });
 };
 
 export const useCriticalIssues = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['critical_issues'],
-    queryFn: () => fetchFromTable<any>('critical_issues')
+    queryKey: ['critical_issues', activeDataset?.id],
+    queryFn: () => fetchFromTable<any>('critical_issues', activeDataset.id),
+    enabled: !!activeDataset?.id
   });
 };
 
 export const usePositiveHighlights = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['positive_highlights'],
-    queryFn: () => fetchFromTable<any>('positive_highlights')
+    queryKey: ['positive_highlights', activeDataset?.id],
+    queryFn: () => fetchFromTable<any>('positive_highlights', activeDataset.id),
+    enabled: !!activeDataset?.id
   });
 };
 
 export const useRecommendations = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['recommendations'],
+    queryKey: ['recommendations', activeDataset?.id],
     queryFn: async () => {
-      const data = await fetchFromTable<any>('recommendations');
+      if (!activeDataset?.id) return null;
+      const data = await fetchFromTable<any>('recommendations', activeDataset.id);
       // Format back to legacy mockData shape + AI signals
       const result = {
         product: data.filter(d => d.category === 'product').map(d => d.suggestion),
@@ -63,13 +77,16 @@ export const useRecommendations = () => {
         }
       };
       return result;
-    }
+    },
+    enabled: !!activeDataset?.id
   });
 };
 
 export const useFlaggedReviews = () => {
+  const { activeDataset } = useDataset();
   return useQuery({
-    queryKey: ['flagged_reviews'],
-    queryFn: () => fetchFromTable<any>('flagged_reviews')
+    queryKey: ['flagged_reviews', activeDataset?.id],
+    queryFn: () => fetchFromTable<any>('flagged_reviews', activeDataset.id),
+    enabled: !!activeDataset?.id
   });
 };

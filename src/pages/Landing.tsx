@@ -53,9 +53,6 @@ const Landing = () => {
             <Button onClick={() => navigate("/dashboard")} size="lg" className="text-sm px-6">
               Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button onClick={() => navigate("/dashboard")} variant="outline" size="lg" className="text-sm px-6">
-              View Demo
-            </Button>
           </div>
         </div>
 
